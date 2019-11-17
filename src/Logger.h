@@ -1,10 +1,9 @@
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#pragma once
 
 class Logger {
 public:
+	static Logger& getInstance();
+
 	Logger();
 	virtual ~Logger();
 };
-
-#endif /* LOGGER_H_ */

@@ -1,5 +1,4 @@
-#ifndef POSITION_H_
-#define POSITION_H_
+#pragma once
 
 class Position {
 public:
@@ -11,5 +10,3 @@ public:
 	Position();
 	virtual ~Position();
 };
-
-#endif /* POSITION_H_ */

@@ -1,7 +1,15 @@
 #include "Radar.h"
+#include <iostream> // FOR DEBUGGING
+
+using namespace std;
+
+Radar& Radar::getInstance() {
+	static Radar _instance;
+	return _instance;
+}
 
 Radar::Radar() {
-	// TODO Auto-generated constructor stub
+	cout << "Radar instantiated" << endl;
 
 }
 
