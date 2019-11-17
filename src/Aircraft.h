@@ -12,4 +12,6 @@ public:
 
 	Aircraft(int, Position, Velocity);
 	virtual ~Aircraft();
+
+	void PrintMembers();
 };

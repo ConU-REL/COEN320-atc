@@ -10,13 +10,19 @@ class Airspace {
 
 public:
 	static Airspace& getInstance();
-	void CollisionPrediction(int period = 180);
+	std::vector<Aircraft> Scan();
+
+	bool AdvanceTime();
+	void ChangeAircraft(int, Aircraft);
 
 private:
 	int m_Time = 0;
+	int m_Next_Event;
+	std::vector<Aircraft> m_TestData;
 	std::vector<Aircraft> m_Aircrafts;
-	std::map<int, int> m_LastPings; // TBD - How do we handle Unknown aircraft?
 	//std::vector<Environment> m_Environment;
+
+	void ProcessEvents();
 
 	Airspace();
 	virtual ~Airspace();

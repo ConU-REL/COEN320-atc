@@ -2,6 +2,7 @@
 #include "Airspace.h"
 #include "Communications.h"
 #include "Radar.h"
+#include <vector>
 
 using namespace std;
 
@@ -15,8 +16,15 @@ int main() {
 	Radar& radar = Radar::getInstance();
 
 
-	airspace.CollisionPrediction();
-	airspace.CollisionPrediction(20);
+	radar.CollisionPrediction();
+	radar.CollisionPrediction(20);
+
+	radar.AdvanceTime();
+	vector<Aircraft> aircrafts = radar.Report();
+
+	for (Aircraft ac : aircrafts) {
+		ac.PrintMembers();
+	}
 
 	return 0;
 }
