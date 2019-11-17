@@ -12,6 +12,7 @@ class Record {
 };
 
 public:
+// I AM A SINGLETON
 
 	int m_Time = 0;
 	std::vector<Record> m_Records;
