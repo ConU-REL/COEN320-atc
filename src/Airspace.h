@@ -3,24 +3,26 @@
 
 #include <vector>
 #include <iostream>
+#include <map>
 #include "Aircraft.h"
-
-class Record {
-	Aircraft aircraft;
-	int last_ping;
-};
-
 
 class Airspace {
 
 public:
 	static Airspace& getInstance();
-	void CollisionPrediction(int period = 180);
+	std::vector<Aircraft> Scan();
+
+	bool AdvanceTime();
+	void ChangeAircraft(int, Aircraft);
 
 private:
 	int m_Time = 0;
-	std::vector<Record> m_Records;
+	int m_Next_Event;
+	std::vector<Aircraft> m_TestData;
+	std::vector<Aircraft> m_Aircrafts;
 	//std::vector<Environment> m_Environment;
+
+	void ProcessEvents();
 
 	Airspace();
 	virtual ~Airspace();

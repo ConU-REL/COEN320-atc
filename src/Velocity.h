@@ -1,11 +1,7 @@
 #pragma once
 
-class Velocity {
-public:
+struct Velocity {
 	int vx;
 	int vy;
 	int vz;
-
-	Velocity();
-	virtual ~Velocity();
 };
