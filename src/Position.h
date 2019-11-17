@@ -1,12 +1,7 @@
 #pragma once
 
-class Position {
-public:
-
+struct Position {
 	int px;
 	int py;
 	int pz;
-
-	Position();
-	virtual ~Position();
 };

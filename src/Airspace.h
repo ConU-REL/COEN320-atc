@@ -3,13 +3,8 @@
 
 #include <vector>
 #include <iostream>
+#include <map>
 #include "Aircraft.h"
-
-class Record {
-	Aircraft aircraft;
-	int last_ping;
-};
-
 
 class Airspace {
 
@@ -19,7 +14,8 @@ public:
 
 private:
 	int m_Time = 0;
-	std::vector<Record> m_Records;
+	std::vector<Aircraft> m_Aircrafts;
+	std::map<int, int> m_LastPings; // TBD - How do we handle Unknown aircraft?
 	//std::vector<Environment> m_Environment;
 
 	Airspace();

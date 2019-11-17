@@ -5,10 +5,11 @@
 
 class Aircraft {
 public:
-	int a_id;
+	Aircraft() = default;
+	int a_id = -1;
 	Position cur_pos;
 	Velocity cur_vel;
 
-	Aircraft();
+	Aircraft(int, Position, Velocity);
 	virtual ~Aircraft();
 };
