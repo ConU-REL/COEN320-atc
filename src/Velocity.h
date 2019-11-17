@@ -1,5 +1,4 @@
-#ifndef VELOCITY_H_
-#define VELOCITY_H_
+#pragma once
 
 class Velocity {
 public:
@@ -10,5 +9,3 @@ public:
 	Velocity();
 	virtual ~Velocity();
 };
-
-#endif /* VELOCITY_H_ */

@@ -1,8 +1,15 @@
 #include "Logger.h"
+#include <iostream>
+
+using namespace std;
+
+Logger& Logger::getInstance() {
+	static Logger _instance;
+	return _instance;
+}
 
 Logger::Logger() {
-	// TODO Auto-generated constructor stub
-
+	cout << "Logger instantiated" << endl;
 }
 
 Logger::~Logger() {

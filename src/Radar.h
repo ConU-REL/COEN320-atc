@@ -1,10 +1,13 @@
-#ifndef RADAR_H_
-#define RADAR_H_
+#pragma once
+
+#include "Logger.h"
 
 class Radar {
 public:
+	static Radar& getInstance();
+
+	Logger& logger = Logger::getInstance();
+
 	Radar();
 	virtual ~Radar();
 };
-
-#endif /* RADAR_H_ */

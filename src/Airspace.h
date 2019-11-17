@@ -1,19 +1,23 @@
-#ifndef AIRSPACE_H_
-#define AIRSPACE_H_
+#pragma once
+
 
 #include <vector>
+#include <iostream>
 #include "Aircraft.h"
-
-class Airspace {
 
 class Record {
 	Aircraft aircraft;
 	int last_ping;
 };
 
-public:
-// I AM A SINGLETON
 
+class Airspace {
+
+public:
+	static Airspace& getInstance();
+	void CollisionPrediction(int period = 180);
+
+private:
 	int m_Time = 0;
 	std::vector<Record> m_Records;
 	//std::vector<Environment> m_Environment;
@@ -21,5 +25,3 @@ public:
 	Airspace();
 	virtual ~Airspace();
 };
-
-#endif /* AIRSPACE_H_ */
