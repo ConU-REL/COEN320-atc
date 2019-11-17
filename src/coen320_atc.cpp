@@ -6,10 +6,6 @@
 
 using namespace std;
 
-void myFunc() {
-	cout << "hi" << endl;
-}
-
 int main() {
 	Airspace& airspace = Airspace::getInstance();
 	Communications& comms = Communications::getInstance();
