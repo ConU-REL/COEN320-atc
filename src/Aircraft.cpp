@@ -5,10 +5,11 @@
 
 using namespace std;
 
-Aircraft::Aircraft(int id, Position position, Velocity velocity) {
+Aircraft::Aircraft(int id, Position position, Velocity velocity, int entry_time) {
 	a_id = id;
 	cur_pos = position;
 	cur_vel = velocity;
+	a_et = entry_time;
 
 	grid_pos.px = ceil((float)(cur_pos.px/5280)/3);
 	grid_pos.py = ceil((float)(cur_pos.py/5280)/3);
@@ -17,6 +18,10 @@ Aircraft::Aircraft(int id, Position position, Velocity velocity) {
 
 Aircraft::~Aircraft() {
 	// TODO Auto-generated destructor stub
+}
+
+void Aircraft::fly(int time) {
+	cur_pos += cur_vel;
 }
 
 void Aircraft::PrintMembers() const {
