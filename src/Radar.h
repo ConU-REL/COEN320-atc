@@ -4,11 +4,14 @@
 #include "Airspace.h"
 #include "Aircraft.h"
 
+#include <mutex>
+#include <condition_variable>
+
 class Radar {
 public:
 	static Radar& getInstance();
 	void CollisionPrediction(int period = 180);
-	bool AdvanceTime();
+	bool AdvanceTime(int seconds = 1);
 	std::vector<Aircraft> Report();
 
 private:
@@ -19,8 +22,15 @@ private:
 	int m_Scan_Interval = 15;
 	std::vector<Aircraft> m_Aircrafts;
 
+	std::thread* m_ProcessingThread = nullptr;
 	void ProcessTime();
 
 	Radar(int scan_interval = 15);
 	virtual ~Radar();
+
+	bool m_SimulationRunning = true;
+	std::mutex m_TimeMutex; // For accessing time
+	std::mutex m_AircraftMutex; // For accessing the scanned aircraft set
+	std::condition_variable m_Cond_ScanTime;
+	std::condition_variable m_Cond_Event;
 };

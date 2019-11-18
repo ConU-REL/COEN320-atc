@@ -11,9 +11,8 @@ Radar& Radar::getInstance() {
 Radar::Radar(int scan_interval)
  : m_Scan_Interval(scan_interval)
 {
+	m_ProcessingThread = new thread{ &Radar::ProcessTime, this };
 	cout << "Radar instantiated" << endl;
-
-
 }
 
 Radar::~Radar() {
@@ -28,18 +27,36 @@ void Radar::CollisionPrediction(int period) {
 }
 
 void Radar::ProcessTime() {
-	// This is just a stub for now
 
-	// OBTAIN mutex for accessing m_Aircrafts
-	//m_Aircrafts = m_Airspace.Scan();
-	// RELEASE mutex for accesing m_Aircrafts
+	while (m_SimulationRunning)
+		{
+			// Wait for a unit of time to pass
+			unique_lock<mutex> timelock(m_TimeMutex);
+			m_Cond_ScanTime.wait(timelock);
+			/*m_Cond_Time.wait(timelock,
+				[&current_time = m_Time, &lt = last_time]
+				 { return (current_time > lt); });*/
+				// To prevent spurious wakeup make sure time has actually passed
+
+			lock_guard<mutex> aircraftlock(m_AircraftMutex);
+			m_Aircrafts = m_Airspace.Scan();
+
+			if (m_Time % LOG_INTERVAL == 0) {
+				// Call the logger
+			}
+		}
 }
 
-bool Radar::AdvanceTime() {
-	if (true) { // TEMP FOR TESTING, normally (m_Time % m_Scan_Interval == 0) {
-		// OBTAIN mutex for accessing m_Aircrafts
-		m_Aircrafts = m_Airspace.Scan();
-		// Release mutex for accessing m_Aircrafts
+bool Radar::AdvanceTime(int seconds) {
+	for (int i = 1; i <= seconds; i++) {
+		{
+			lock_guard<mutex> timelock(m_TimeMutex);
+			m_Time++;
+			if (m_Time % RADAR_INTERVAL == 0) {
+				m_Cond_ScanTime.notify_all(); // Let ProcessTime run
+			}
+		}
+
 	}
 	return true;
 }
