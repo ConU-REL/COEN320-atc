@@ -10,10 +10,12 @@ Display& Display::getInstance() {
 	return _instance;
 }
 
+
 Display::Display() {
 	cout << "Display instantiated" << endl;
 	this->aircraft = NULL;		// initialize to NULL to suppress IDE warning
 }
+
 
 void Display::print_grid(){
 	int grid_size_x = ceil((float)(x_size / min_x_sep) / quadrant_size) * quadrant_size;
@@ -49,7 +51,7 @@ void Display::print_grid(){
 			}
 
 			// TODO: PRINT AIRPLANES HERE
-			cout << " ";
+			cout << check_position(j, i);
 
 		}
 		cout << "|";
@@ -61,10 +63,21 @@ void Display::print_grid(){
 	cout << string(grid_size_x+columns+1, '-') << endl;
 }
 
+
 void Display::link_aircraft(const vector<Aircraft> &ac){
 	aircraft = &ac;
-	cout << aircraft->at(0).grid_pos.px << endl;
 }
+
+
+char Display::check_position(const int x, const int y) const{
+	for(auto ac : *aircraft){
+		if(ac.grid_pos.px == x && ac.grid_pos.py == y){
+			return 89 - ceil((float)ac.grid_pos.pz/min_z_sep);
+		}
+	}
+	return 0;
+}
+
 
 Display::~Display() {
 	// TODO Auto-generated destructor stub

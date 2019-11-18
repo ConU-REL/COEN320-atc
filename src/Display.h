@@ -24,10 +24,11 @@ private:
 	int min_y_sep = min_x_sep;	// minimum aircraft y separation in miles
 	int min_z_sep = 1000;		// minimum aircraft z separation in feet
 	// end environment properties
-	int quadrant_size = 4;		// number of points per quadrant
-
+	int quadrant_size = 4;		// number of rows and columns per quadrant
 	const vector<Aircraft> *aircraft;	// pointer to vector of known aircraft
 
+	// member functions
+	char check_position(const int x, const int y) const;
 
 	// constructors
 	Display();

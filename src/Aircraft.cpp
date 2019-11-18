@@ -11,7 +11,7 @@ Aircraft::Aircraft(int id, Position position, Velocity velocity) {
 	cur_vel = velocity;
 
 	grid_pos.px = ceil((float)(cur_pos.px/5280)/3);
-	grid_pos.py = ceil((float)(cur_pos.px/5280)/3);
+	grid_pos.py = ceil((float)(cur_pos.py/5280)/3);
 	grid_pos.pz = cur_pos.pz;
 }
 
