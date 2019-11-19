@@ -10,9 +10,14 @@
 #include "Aircraft.h"
 
 // For now I've put these definitions here but there should perhaps be a better place
-#define RADAR_INTERVAL 10
+#define RADAR_INTERVAL 5
 #define DISPLAY_INTERVAL 5
 #define LOG_INTERVAL 5
+#define PREDICTION_WINDOW 180
+
+#define MIN_SEP_X 3*5280
+#define MIN_SEP_Y 3*5280
+#define MIN_SEP_Z 1000
 
 class Airspace {
 

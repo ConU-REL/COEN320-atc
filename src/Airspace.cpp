@@ -48,19 +48,20 @@ void Airspace::ProcessMovement() {
 	{
 		// Wait for a unit of time to pass
 		unique_lock<mutex> timelock(m_TimeMutex);
-		m_Cond_Time.wait(timelock);
-		/*m_Cond_Time.wait(timelock,
+		//m_Cond_Time.wait(timelock);
+		m_Cond_Time.wait(timelock,
 			[&current_time = m_Time, &lt = last_time]
-			 { return (current_time > lt); });*/
+			 { return (current_time > lt); });
 			// To prevent spurious wakeup make sure time has actually passed
 
-		// Let all of the aircraft fly one unit of Velocity
-		// OBTAIN MUTEX for Active Aircraft
-		for (Aircraft ac : m_Aircrafts) {
+		last_time = m_Time;
 
-			ac.fly();
+		// Let all of the aircraft fly one unit of Velocity
+		lock_guard<mutex> activelock(m_ActiveMutex);
+		for (int i = 0; i < m_Aircrafts.size(); i++) {
+			m_Aircrafts[i].fly();
 		}
-		cout << "FLYING! Elapsed time: " << m_Time << endl;
+		//cout << "FLYING! Elapsed time: " << m_Time << endl;
 
 		// TBD add environment movement
 
@@ -80,7 +81,7 @@ void Airspace::ProcessMovement() {
 
 			// The data set is always sorted by entry time, so the first i rows should be added
 			if ( i > 0) { // If we have at least one aircraft to add to the active set
-				lock_guard<mutex> activelock(m_ActiveMutex);
+				//lock_guard<mutex> activelock(m_ActiveMutex); // we already have this mutex from earlier
 				m_Aircrafts.insert(m_Aircrafts.end(),m_A_Dataset.begin(),m_A_Dataset.begin()+i);
 				m_A_Dataset.erase(m_A_Dataset.begin(),m_A_Dataset.begin()+i);
 			}
@@ -96,7 +97,7 @@ bool Airspace::AdvanceTime(int seconds) {
 		lock_guard<mutex> timelock(m_TimeMutex);
 		m_Time++;
 		}
-		m_Cond_Time.notify_all(); // Let ProcessMovement run
+		m_Cond_Time.notify_one(); // Let ProcessMovement run
 	}
 	return true;
 }
@@ -168,94 +169,9 @@ void Airspace::ChangeAircraft() {
 				cout << "TBD SIMILAR TO ADD" << endl;
 					break;
 			}
-			default:
-					break;
+			default: break;
 		}
 	}
-
-
-
-	// OBTAIN Condvar and mutex for accessing m_Changes
-		// If m_Changes is not empty
-			// OBTAIN Condvar and mutex for accessing m_TestData
-			// Append contents of m_Changes to m_TestData
-			// RELEASE mutex for accessing m_Changes
-			// Sort m_TestData by entry time (lowest to highest)
-			// Set m_Next_Event to the entry_time of the first aircraft in m_TestData
-			// RELEASE mutex for accessing m_TestData
-		// Else RELEASE mutex for accessing m_Changes
-
-	/*int last_time = 0;
-		while (m_SimulationRunning)
-		{
-			// Wait for a unit of time to pass
-			unique_lock<mutex> lock(m_TimeMutex);
-					m_Cond_Time.wait(lock,
-						[&currrent_time = m_Time]
-						 { return (currrent_time > last_time); });
-						// To prevent spurious wakeup make sure time has actually passed
-
-			// Let all of the aircraft fly one unit of Velocity
-			// OBTAIN MUTEX for Active Aircraft
-			for (Aircraft ac : m_Aircrafts) {
-				ac.fly();
-			}
-		}
-
-			unique_lock<mutex> lock(m_TimeMutex);
-			m_Cond_Event.wait(lock,
-					[&event = m_Next_Event, &curtime = m_Time]
-					 { return (event <= curtime); });
-					// To prevent spurious wakeup make sure there is an event to process
-
-			// There is an event to process, figure out what it is
-
-			// OBTAIN MUTEX for Aircraft Data Set
-
-			// Determine how many aircraft in the data set have entered our system
-			int i=0;
-			for (Aircraft ac : m_A_Dataset) {
-				if (ac.a_et <= m_Time) { // If their entry time is now or in the past
-					i++;
-				}
-				else {
-					break; // The data set is always sorted by entry time, stop if entry time is in the future
-				}
-			}
-
-
-
-			// The data set is always sorted by entry time, so the first i rows should be added
-			if ( i > 0) {
-				m_Aircrafts.insert(m_Aircrafts.end(),m_A_Dataset.begin(),m_A_Dataset.begin()+i);
-				m_A_Dataset.erase(m_A_Dataset.begin(),m_A_Dataset.begin()+i);
-			}
-
-
-
-
-
-		}*/
-
-
-
-
-
-
-
-
-
-
-		// If m_Next_Event <= m_Time is true
-		// OBTAIN Condvar and mutex for accessing m_TestData
-		// OBTAIN Condvar and mutex for accessing m_Aircrafts
-			// While m_TestData[i].entry_time <= m_Time && i < m_TestData.size()
-				// copy m_TestData[i++] into m_Aircrafts
-		// Release mutex for accessing m_TestData
-		// Release mutex for accessing m_Aircrafts
-
-	m_Next_Event = m_Time;
-	//Notify the running thread to add/edit/delete an aircraft
 }
 
 Airspace::~Airspace() {
@@ -263,7 +179,6 @@ Airspace::~Airspace() {
 }
 
 vector<Aircraft> Airspace::Scan() {
-	// OBTAIN mutex for accessing m_Aircrafts
+	lock_guard<mutex> activelock(m_ActiveMutex);
 	return m_Aircrafts;
-	// RELEASE mutex for accesing m_Aircrafts
 }

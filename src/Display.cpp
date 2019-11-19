@@ -53,6 +53,10 @@ void Display::print_grid(){
 			// TODO: PRINT AIRPLANES HERE
 			cout << check_position(j, i);
 
+			/*for (Aircraft ac : *aircraft) {
+				ac.PrintMembers();	// The position of the aircraft are definitely updated in this scope
+			}*/
+
 		}
 		cout << "|";
 		if((float)(i % quadrant_size) == 1){
@@ -68,10 +72,11 @@ void Display::link_aircraft(const vector<Aircraft> &ac){
 	aircraft = &ac;
 }
 
-
 char Display::check_position(const int x, const int y) const{
 	for(auto ac : *aircraft){
 		if(ac.grid_pos.px == x && ac.grid_pos.py == y){
+			//cout << "x: " << x << " y: " << y << endl; // These numbers never change for a given aircraft once it first appears.
+			//ac.PrintMembers(); // The position of the aircraft are definitely updated in this scope
 			return 89 - ceil((float)ac.grid_pos.pz/min_z_sep);
 		}
 	}
