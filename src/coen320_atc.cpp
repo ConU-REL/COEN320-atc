@@ -15,6 +15,9 @@ int main() {
 	Radar& radar = Radar::getInstance();
 	Display& disp = Display::getInstance();
 
+	//radar.CollisionPrediction();
+	//radar.CollisionPrediction(20);
+
 	int time = 0;
 	vector<Aircraft> aircrafts;
 	std::this_thread::sleep_for(std::chrono::milliseconds(milliwait));
