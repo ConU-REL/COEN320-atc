@@ -58,8 +58,11 @@ void Airspace::ProcessMovement() {
 
 		// Let all of the aircraft fly one unit of Velocity
 		lock_guard<mutex> activelock(m_ActiveMutex);
-		for (int i = 0; i < m_Aircrafts.size(); i++) {
+		/*for (int i = 0; i < m_Aircrafts.size(); i++) {
 			m_Aircrafts[i].fly();
+		}*/
+		for (Aircraft& ac : m_Aircrafts) {
+			ac.fly();
 		}
 		//cout << "FLYING! Elapsed time: " << m_Time << endl;
 
@@ -69,7 +72,7 @@ void Airspace::ProcessMovement() {
 			// Determine how many aircraft in the data set have entered our system
 			int i=0;
 			lock_guard<mutex> datalock(m_DataMutex);
-			for (Aircraft ac : m_A_Dataset) {
+			for (Aircraft& ac : m_A_Dataset) {
 				if (ac.a_et <= m_Time) { // If their entry time is now or in the past
 					i++;
 				}
