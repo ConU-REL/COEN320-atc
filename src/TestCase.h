@@ -26,8 +26,8 @@ public:
 //	5, 	0, 			0, 			0, 			100*5280, 	100*5280, 		0, 		0,
 //	6, 	0, 			0, 			0, 			0, 			100*5280, 		25000, 	0,
 //	7, 	0, 			0, 			0, 			100*5280, 	100*5280, 		25000, 	0, 	// First 8 rows are the corners of our airspace
-	8, 	900, 		0, 			0, 			0, 			200000, 		500, 	5,	// First plane moving in only 1 dimension
-	9, 	0, 			1000, 		0, 			200000, 	0, 				600, 	5,  // Second plane will crash into first
+	8, 	1000, 		0, 			0, 			0, 			300000, 		500, 	5,	// First plane moving in only 1 dimension
+	9, 	0, 			1000, 		0, 			300000, 	0, 				600, 	5,  // Second plane will crash into first
 //	10, -200, 		1, 		0, 				2500, 	100000+5280, 	1000, 	10, // Edge case, exactly at separation distance from first plane, should not trigger warning
 //	11, 0, 			1000, 		-1, 		7000+5280, 	100000+5279, 	1000, 	10, // Edge case, barely within separation distance, should trigger warning
 //	12, 200, 		-1,			0, 			2500, 		100000, 		1000, 	5,

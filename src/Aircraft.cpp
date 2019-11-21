@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Aircraft::Aircraft(int id, Position position, Velocity velocity, int entry_time) {
+Aircraft::Aircraft(int s_id, int id, Position position, Velocity velocity, int entry_time) {
 	a_id = id;
 	cur_pos = position;
 	cur_vel = velocity;

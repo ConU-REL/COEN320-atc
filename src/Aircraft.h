@@ -13,7 +13,7 @@ public:
 	Position grid_pos;		// the position within the grid for display purposes
 	int a_et; // Aircraft entry time
 
-	Aircraft(int, Position, Velocity, int);
+	Aircraft(int, int, Position, Velocity, int);
 	virtual ~Aircraft();
 
 	void PrintMembers() const;

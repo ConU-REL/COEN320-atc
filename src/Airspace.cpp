@@ -29,7 +29,7 @@ Airspace::Airspace() {
 		Velocity velo{ data[i+1], data[i+2], data[i+3] };
 		Position pos{ data[i+4], data[i+5], data[i+6] };
 		lock_guard<mutex> datalock(m_DataMutex); // This shouldn't technically be necessary at this point
-		m_A_Dataset.emplace_back(data[i], pos, velo, data[i+7]);
+		m_A_Dataset.emplace_back(next_unique_id++, data[i], pos, velo, data[i+7]);
 		lock_guard<mutex> timelock(m_TimeMutex); // This shouldn't technically be necessary at this point
 		if (data[i+7] < m_Next_Event) {
 			m_Next_Event = data[i+7];

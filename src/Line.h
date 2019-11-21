@@ -1,19 +1,27 @@
 #pragma once
 
+#include <cmath>
+#include <algorithm>
 
-	struct Line {
-	public:
-		// y = mx + b
-		float px, py; // a point on the line (typically the start point)
-		float vx, vy;
-		float m; // slope
-		float b; // y intercept
+#include "TimeInterval.h"
+#include "Intersection.h"
 
-		bool parallel(Line);
-		float findXIntersectPoint(Line);
+struct Line { // Used for x(t) and y(t) individually
+	// y = mx + b
+	float px, py; // a point on the line (typically the start point)
+	float m; // slope
+	float b; // y intercept
 
-		Line(int, int, int, int);
-		virtual ~Line();
-	};
+	Line(int, int, int);
+	float findIntersection(Line, int);
+};
 
+struct DoubleLine : public Line { // Used for lines which are x and y (collectively) as a function of time
+	// This is a line
+	float vx, vy;
 
+	DoubleLine(int, int, int, int);
+	bool parallel(DoubleLine);
+	Intersection findPerpendicularViolation(DoubleLine, float, int, int);
+	Intersection getProximityInterval(DoubleLine, float, int, int);
+};

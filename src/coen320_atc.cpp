@@ -8,16 +8,12 @@
 using namespace std;
 
 int main() {
-	int milliwait = 100;
+	int milliwait = 50;
 
 	Airspace& airspace = Airspace::getInstance();
 	Communications& comms = Communications::getInstance();
 	Radar& radar = Radar::getInstance();
 	Display& disp = Display::getInstance();
-
-
-	//radar.CollisionPrediction();
-	//radar.CollisionPrediction(20);
 
 	int time = 0;
 	vector<Aircraft> aircrafts;
