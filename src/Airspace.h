@@ -12,7 +12,7 @@
 // For now I've put these definitions here but there should perhaps be a better place
 #define RADAR_INTERVAL 5
 #define DISPLAY_INTERVAL 5
-#define LOG_INTERVAL 5
+#define LOG_INTERVAL 15
 #define PREDICTION_WINDOW 180
 
 #define MIN_SEP_X 3*5280

@@ -23,5 +23,6 @@ struct DoubleLine : public Line { // Used for lines which are x and y (collectiv
 	DoubleLine(int, int, int, int);
 	bool parallel(DoubleLine);
 	Intersection findPerpendicularViolation(DoubleLine, float, int, int);
-	Intersection getProximityInterval(DoubleLine, float, int, int);
+	Intersection find1DimensionalViolation(DoubleLine, float, int, int);
+	Intersection findViolationPoint(DoubleLine, float, int, int);
 };
