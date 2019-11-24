@@ -7,29 +7,27 @@
 
 using namespace std;
 
-bool frozen;
+
 
 int main() {
-	int time = 0;
-	int milliwait = 50;
-	frozen = true;
-
 	ATC_System& sys = ATC_System::getInstance();
-	vector<Aircraft> aircrafts;
+	Airspace& airspace = Airspace::getInstance();
 
-	char input;
-	char exit = 'X'; // Exit the application as a whole
-	char resume = 'R';
+	char input; // Store user input for evaluation
+	char resume = 'R'; // Resume the simulation
 	char pause = 'P'; // Pause the simulation
+	char back = 'B';
+	char exit = 'X'; // Exit the application as a whole
 
 	while (input != exit) { // Pause menu
 		cout << endl << "Simulation status: PAUSED" << endl << endl;
 
 		cout << "Enter a command" << endl;
-		cout << "\t" << resume << ")Resume simulation" << endl;
-		cout << "\t2)View/Edit Aircraft data" << endl;
+		cout << "\t" << resume << ")Resume simulation" << endl << endl;
 
-		cout << "\t" << exit << ")Exit application" << endl;
+		cout << "\t1)View/Edit Aircraft data" << endl;
+
+		cout << endl << "\t" << exit << ")Exit application" << endl;
 		// Maybe put a confirmation for exit
 
 		input = '\0';
@@ -42,11 +40,12 @@ int main() {
 				cout << "Simulation status: RUNNING" << endl << endl;
 
 				cout << "Enter a command" << endl;
+				cout << "\t" << pause << ")STOP - Pause Simulation" << endl << endl;
+
 				cout << "\t1)SHOW - Plan View and Message Display" << endl;
 				cout << "\t2)DATA - View active aircraft information" << endl;
-				cout << "\t" << pause << ")STOP - Pause Simulation" << endl;
 
-				cout << "\tX)Exit application" << endl;
+				cout << endl << "\tX)Exit application" << endl;
 				// Maybe put a confirmation for exit
 
 				input = '\0';
@@ -69,28 +68,54 @@ int main() {
 			}
 			sys.Pause();
 		}
-	}
+		else if (input == '1') { // List information for ALL aircraft
+			while (input != back) {
+				cout << endl << "Simulation status: PAUSED" << endl << endl;
 
+				cout << "Enter a command" << endl;
+				cout << "\t1)View/Edit Active aircraft data" << endl;
+				cout << "\t2)View/Edit Future aircraft data" << endl;
+				cout << "\t3)Add an aircraft" << endl;
 
+				cout << endl << "\t" << back << ")Back to previous menu" << endl;
 
-	while (!frozen) {
-		time++;
-		//airspace.AdvanceTime();
-		//radar.AdvanceTime();
-		//std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Delay for radar to be able to read from airspace
-		if (time % RADAR_INTERVAL == 0) {
-			//aircrafts = radar.Report();
-		}
+				input = '\0';
+				cin >> input;
 
-		if (time % DISPLAY_INTERVAL == 0) {
-			sys.link_aircraft(aircrafts);
-			sys.print_grid();
-			for (Aircraft ac : aircrafts) {
-				ac.PrintMembers();
+				if (input == '1') { // Show the display
+					airspace.displayActiveAircraft();
+
+					int sid; // System ID for the aircraft
+					int escape = -1;
+					while (sid != escape) {
+						cout << endl << "Simulation status: PAUSED" << endl << endl;
+
+						cout << "Enter a command" << endl;
+						cout << "\t" << escape << ")Back to previous menu" << endl << endl;
+						cout << "\tEnter the SID of the Aircraft you wish to modify" << endl;
+
+						sid = '\0';
+						cin >> sid;
+
+						if (sid != -1) {
+							if (cin.fail()) {
+								cout << "INVALID SID" << endl;
+								cin.clear();
+								cin.ignore(10000, '\n');
+							}
+							else{
+								airspace.ChangeAircraft(sid);
+							}
+						}
+
+					}
+
+				}
+				else if (input == '2') { // List information for active aircraft
+					airspace.displayAircraftDataSet();
+				}
 			}
 		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(milliwait));
 	}
 
 	cout << "Simulation terminated." << endl;

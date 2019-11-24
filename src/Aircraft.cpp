@@ -5,7 +5,8 @@
 
 using namespace std;
 
-Aircraft::Aircraft(int s_id, int id, Position position, Velocity velocity, int entry_time) {
+Aircraft::Aircraft(int sid, int id, Position position, Velocity velocity, int entry_time) {
+	s_id = sid;
 	a_id = id;
 	cur_pos = position;
 	cur_vel = velocity;
@@ -29,12 +30,11 @@ void Aircraft::fly(int time) {
 }
 
 void Aircraft::PrintMembers() const {
-	cout << "ID: ";
 	if (a_id == -1) {
-		cout << "UNKNOWN ";
+		cout << "ID: UNKNOWN ";
 	}
 	else {
-		cout << a_id << " ";
+		cout << "ID:" << a_id << " ";
 	}
 	cout << "POSITION: " << cur_pos.px << "," << cur_pos.py << "," << cur_pos.pz << " "
 			"VELOCITY: " << cur_vel.vx << "," << cur_vel.vy << "," << cur_vel.vz << " " << endl;

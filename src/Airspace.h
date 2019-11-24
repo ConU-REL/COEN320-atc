@@ -26,7 +26,10 @@ public:
 	std::vector<Aircraft> Scan();
 
 	bool AdvanceTime(int seconds = 1);
-	void ChangeAircraft();
+	void AddAircraft();
+	void ChangeAircraft(int);
+	void displayActiveAircraft();
+	void displayAircraftDataSet();
 
 private:
 	int next_unique_id = 0;
