@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Aircraft::Aircraft(int id, Position position, Velocity velocity, int entry_time) {
+Aircraft::Aircraft(int s_id, int id, Position position, Velocity velocity, int entry_time) {
 	a_id = id;
 	cur_pos = position;
 	cur_vel = velocity;
@@ -22,6 +22,10 @@ Aircraft::~Aircraft() {
 
 void Aircraft::fly(int time) {
 	cur_pos += cur_vel;
+	cur_pos.pz = cur_pos.pz - cur_vel.vz; // Ignore z axis in our airspace
+
+	grid_pos.px = ceil((float)(cur_pos.px/5280)/3);
+	grid_pos.py = ceil((float)(cur_pos.py/5280)/3);
 }
 
 void Aircraft::PrintMembers() const {

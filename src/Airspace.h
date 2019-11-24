@@ -10,9 +10,14 @@
 #include "Aircraft.h"
 
 // For now I've put these definitions here but there should perhaps be a better place
-#define RADAR_INTERVAL 10
+#define RADAR_INTERVAL 5
 #define DISPLAY_INTERVAL 5
-#define LOG_INTERVAL 5
+#define LOG_INTERVAL 15
+#define PREDICTION_WINDOW 180
+
+#define MIN_SEP_X 3*5280
+#define MIN_SEP_Y 3*5280
+#define MIN_SEP_Z 1000
 
 class Airspace {
 
@@ -24,6 +29,8 @@ public:
 	void ChangeAircraft();
 
 private:
+	int next_unique_id = 0;
+
 	int m_Time = 0;
 	int m_Next_Event;
 	std::vector<Aircraft> m_A_Dataset;

@@ -32,5 +32,5 @@ private:
 	std::mutex m_TimeMutex; // For accessing time
 	std::mutex m_AircraftMutex; // For accessing the scanned aircraft set
 	std::condition_variable m_Cond_ScanTime;
-	std::condition_variable m_Cond_Event;
+	std::condition_variable m_Cond_ReportReady;
 };
