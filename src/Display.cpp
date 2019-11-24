@@ -88,3 +88,23 @@ Display::~Display() {
 	// TODO Auto-generated destructor stub
 }
 
+void Display::process_time() {
+	int last_time = 0;
+		while (m_SimulationRunning)
+		{
+			// Wait for a unit of time to pass
+			unique_lock<mutex> timelock(m_TimeMutex);
+			m_Cond_Time.wait(timelock,
+				[&current_time = m_Time, &lt = last_time]
+				 { return (current_time > lt); });
+				// To prevent spurious wakeup make sure time has actually passed
+
+			last_time = m_Time;
+
+			while (!m_frozen) {
+
+				// Wait for the remaining time
+			}
+		}
+}
+

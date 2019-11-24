@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Aircraft.h"
+#include "Airspace.h"
+#include <mutex>
+#include <condition_variable>
 #include <vector>
 
 using namespace std;
@@ -13,7 +16,18 @@ public:
 	void link_aircraft(const vector<Aircraft> &ac);
 	void print_grid();
 
+
+
+	void process_time();
+
 private:
+	int m_Time = 0;
+	bool m_SimulationRunning = true;
+	bool m_frozen = true;
+	std::mutex m_TimeMutex; // For accessing time
+	std::condition_variable m_Cond_Time;
+
+
 	// member variables
 	// environment properties
 	int x_size = 100;	// airspace x-dim in miles

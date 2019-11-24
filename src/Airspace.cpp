@@ -58,11 +58,14 @@ void Airspace::ProcessMovement() {
 
 		// Let all of the aircraft fly one unit of Velocity
 		lock_guard<mutex> activelock(m_ActiveMutex);
-		/*for (int i = 0; i < m_Aircrafts.size(); i++) {
-			m_Aircrafts[i].fly();
-		}*/
-		for (Aircraft& ac : m_Aircrafts) {
-			ac.fly();
+		for (auto it = m_Aircrafts.begin(); it != m_Aircrafts.end(); ) {
+			if (it->cur_pos.px < 0 || it->cur_pos.px > 105*5280 || it->cur_pos.py < 0 || it->cur_pos.py > 105*5280) {
+				it = m_Aircrafts.erase(it); // If it leaves our airspace, erase it from the Active Aircraft list
+				// Erase returns an iterator pointing to the next element of our list
+			} else {
+				it->fly();
+				it++;
+			}
 		}
 		//cout << "FLYING! Elapsed time: " << m_Time << endl;
 
