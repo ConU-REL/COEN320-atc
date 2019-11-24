@@ -16,20 +16,20 @@
 class TestCase {
 public:
 	//each line is an airplane: ID, speed_x, speed_y, speed_z, x, y, z, entry time.
-	int airplane_schedule[16] = {
+	int airplane_schedule[32] = {
 //  ID, speed_x, 	speed_y, 	speed_z, 	x, 			y, 				z, 		entry time.
 //	0, 	0, 			0, 			0, 			0, 			0, 				0, 		0, 	// First 8 rows are the corners of our airspace
 //	1, 	0, 			0, 			0, 			100*5280, 	0, 				0, 		0,
 //	2, 	0, 			0, 			0, 			0, 			0, 				25000, 	0,
 //	3, 	0, 			0, 			0, 			100*5280, 	0, 				25000, 	0,
-//	4, 	0, 			0, 			0, 			0, 			100*5280, 		0, 		0,
-//	5, 	0, 			0, 			0, 			100*5280, 	100*5280, 		0, 		0,
-//	6, 	0, 			0, 			0, 			0, 			100*5280, 		25000, 	0,
-//	7, 	0, 			0, 			0, 			100*5280, 	100*5280, 		25000, 	0, 	// First 8 rows are the corners of our airspace
+//	4, 	0, 			0, 			0, 			0, 			105*5280, 		0, 		0,
+//	5, 	0, 			0, 			0, 			100*5280, 	105*5280, 		0, 		0,
+	6, 	0, 			0, 			0, 			0, 			105*5280, 		25000, 	0,
+	7, 	0, 			0, 			0, 			100*5280, 	105*5280, 		25000, 	0, 	// First 8 rows are the corners of our airspace
 //	8, 	1000, 		-500, 			0, 			100000, 			300000, 		500, 	5,	// First plane moving in only 1 dimension
 //	9, 	1500, 		-750, 			0, 			100000, 			300000, 				1400, 	40,  // Second plane will crash into first
-	10, 100, 		1, 		0, 			3000, 		100000+5280, 	23900, 	10, // Edge case, exactly at separation distance from first plane, should not trigger warning
-	11, 0, 		100, 		0, 			100000+5280, 	3000, 	23000, 	10, // Edge case, barely within separation distance, should trigger warning
+	10, -1000, 		0, 		0, 			203000, 		100000+5280, 	23900, 	10, // Edge case, exactly at separation distance from first plane, should not trigger warning
+	11, 1, 		-1000, 		0, 			100000+5280, 	203000, 	23000, 	10, // Edge case, barely within separation distance, should trigger warning
 //	12, 200, 		-1,			0, 			2500, 		100000, 		1000, 	5,
 //	13, 619, 		-280, 		194, 		74000, 	0, 		10000, 	30,
 //	14, -141, 		427, 		-321, 		410000, 	102251, 11000, 	40,
