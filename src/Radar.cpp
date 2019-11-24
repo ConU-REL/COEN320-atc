@@ -32,7 +32,8 @@ void Radar::CollisionPrediction(int period) {
 void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time = PREDICTION_WINDOW) {
 
 	if (abs(ac1.cur_pos.pz - ac2.cur_pos.pz) < MIN_SEP_Z) {
-		if (abs(sqrt(pow(ac1.cur_pos.px - ac2.cur_pos.px,2.0f) + pow(ac1.cur_pos.py - ac2.cur_pos.py,2.0f))) < MIN_SEP_X) {
+		//if (abs(sqrt(pow(ac1.cur_pos.px - ac2.cur_pos.px,2.0f) + pow(ac1.cur_pos.py - ac2.cur_pos.py,2.0f))) < MIN_SEP_X) {
+		if (abs(ac1.cur_pos.px - ac2.cur_pos.px) < MIN_SEP_X || abs(ac1.cur_pos.py - ac2.cur_pos.py) < MIN_SEP_Y) {
 			cout << "*********** CRASH RISK ***********" << endl;
 			cout << ac1.a_id << " - " << ac2.a_id << " ARE WITHIN UNSAFE DISTANCE NEAR (" << ac1.cur_pos.px << "," << ac1.cur_pos.py << ")" << endl;
 			cout << "*********** CRASH RISK ***********" << endl;
@@ -157,8 +158,7 @@ void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time
 				}*/
 			}
 			if (intersection.t >= 0.0f) { // We are only concerned with intersections that occur at future points in time
-				cout << ac1.a_id << " - " << ac2.a_id << " violate separation at (" << intersection.x << "," << intersection.y << ")" << endl;
-				cout << "Violation will occur in " << intersection.t << " seconds." << endl;
+				cout << ac1.a_id << " - " << ac2.a_id << " violate separation near (" << intersection.x << "," << intersection.y << ") in " << intersection.t << " seconds." << endl;
 			}
 		}
 	}
@@ -166,7 +166,7 @@ void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time
 
 void Radar::ProcessTime() {
 	int last_time = 0;
-	while (m_SimulationRunning) {
+	while (m_SystemOnline) {
 		// Wait for a unit of time to pass
 		unique_lock<mutex> timelock(m_TimeMutex);
 		m_Cond_ScanTime.wait(timelock,

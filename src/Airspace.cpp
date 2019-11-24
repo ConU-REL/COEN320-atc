@@ -44,7 +44,7 @@ Airspace::Airspace() {
 // Runs in a separate thread. Tracks position of aircraft with the highest degree of accuracy
 void Airspace::ProcessMovement() {
 	int last_time = 0;
-	while (m_SimulationRunning)
+	while (m_SystemOnline)
 	{
 		// Wait for a unit of time to pass
 		unique_lock<mutex> timelock(m_TimeMutex);

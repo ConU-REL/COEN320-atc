@@ -28,7 +28,7 @@ private:
 	Radar(int scan_interval = 15);
 	virtual ~Radar();
 
-	bool m_SimulationRunning = true;
+	bool m_SystemOnline = true;
 	std::mutex m_TimeMutex; // For accessing time
 	std::mutex m_AircraftMutex; // For accessing the scanned aircraft set
 	std::condition_variable m_Cond_ScanTime;

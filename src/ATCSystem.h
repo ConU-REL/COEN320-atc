@@ -2,16 +2,20 @@
 
 #include "Aircraft.h"
 #include "Airspace.h"
+#include "Radar.h"
+#include "Communications.h"
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+#include <chrono>
+#include <algorithm>
 
 using namespace std;
 
-class Display {
+class ATC_System {
 
 public:
-	static Display& getInstance();
+	static ATC_System& getInstance();
 	void print();
 	void link_aircraft(const vector<Aircraft> &ac);
 	void print_grid();
@@ -20,12 +24,27 @@ public:
 
 	void process_time();
 
+	void show_plan(bool);
+
+	void Resume();
+	void Pause();
+
 private:
+	int m_Milliwait = 100;
 	int m_Time = 0;
-	bool m_SimulationRunning = true;
-	bool m_frozen = true;
+	bool m_SystemOnline = true;
+	bool m_Paused = true;
+	bool m_Show_Display = false;
 	std::mutex m_TimeMutex; // For accessing time
 	std::condition_variable m_Cond_Time;
+
+
+
+	Airspace& airspace = Airspace::getInstance();
+	Communications& comms = Communications::getInstance();
+	Radar& radar = Radar::getInstance();
+
+	std::thread* m_ProcessingThread = nullptr;
 
 
 	// member variables
@@ -39,12 +58,12 @@ private:
 	int min_z_sep = 1000;		// minimum aircraft z separation in feet
 	// end environment properties
 	int quadrant_size = 4;		// number of rows and columns per quadrant
-	const vector<Aircraft> *aircraft;	// pointer to vector of known aircraft
+	vector<Aircraft> aircraft;	// pointer to vector of known aircraft
 
 	// member functions
 	char check_position(const int x, const int y) const;
 
 	// constructors
-	Display();
-	virtual ~Display();
+	ATC_System();
+	virtual ~ATC_System();
 };

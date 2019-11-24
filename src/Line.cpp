@@ -87,7 +87,7 @@ Intersection DoubleLine::findViolationPoint(DoubleLine line2, float max_time, in
 	cout << int3.start << " - " << int3.end << endl;
 	cout << int4.start << " - " << int4.end << endl;*/
 
-	if (int4.start > 0.0f) {
+	if (int3.start <= max_time) {
 		it = int4.start;
 		ix = px + it * vx;
 		iy = py + it * vy;
