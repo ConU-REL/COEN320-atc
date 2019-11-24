@@ -44,7 +44,7 @@ private:
 	Airspace();
 	virtual ~Airspace();
 
-	bool m_SimulationRunning = true;
+	bool m_SystemOnline = true;
 	std::mutex m_TimeMutex; // For accessing time
 	std::mutex m_DataMutex; // For accessing the aircraft data set
 	std::mutex m_ActiveMutex; // For accessing the active aircraft
