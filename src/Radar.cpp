@@ -18,57 +18,61 @@ Radar::Radar(int scan_interval)
 	cout << "Radar instantiated" << endl;
 }
 
-Radar::~Radar() {
-	// TODO Auto-generated destructor stub
-}
-
-
 void Radar::CollisionPrediction(int period) {
 	cout << "Prediction for the next " << period << " seconds." << endl;
 
 	// If you detect a collision within the period send a message to the user via COMMUNICATIONS
 }
 
-void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time = PREDICTION_WINDOW) {
+void Radar::PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time) {
 
 	if (abs(ac1.cur_pos.pz - ac2.cur_pos.pz) < MIN_SEP_Z) {
 		//if (abs(sqrt(pow(ac1.cur_pos.px - ac2.cur_pos.px,2.0f) + pow(ac1.cur_pos.py - ac2.cur_pos.py,2.0f))) < MIN_SEP_X) {
-		if (abs(ac1.cur_pos.px - ac2.cur_pos.px) < MIN_SEP_X || abs(ac1.cur_pos.py - ac2.cur_pos.py) < MIN_SEP_Y) {
-			cout << "*********** CRASH RISK ***********" << endl;
-			cout << ac1.a_id << " - " << ac2.a_id << " ARE WITHIN UNSAFE DISTANCE NEAR (" << ac1.cur_pos.px << "," << ac1.cur_pos.py << ")" << endl;
-			cout << "*********** CRASH RISK ***********" << endl;
+		if (abs(ac1.cur_pos.px - ac2.cur_pos.px) < MIN_SEP_X && abs(ac1.cur_pos.py - ac2.cur_pos.py) < MIN_SEP_Y) {
+			lock_guard<mutex> warninglock(m_WarningMutex);
+			m_Warnings.emplace_back("*********** CRASH RISK ***********\n" +
+					to_string(ac1.a_id) + " - " + to_string(ac2.a_id) + " ARE WITHIN UNSAFE DISTANCE NEAR (" + to_string(ac1.cur_pos.px) + "," + to_string(ac1.cur_pos.py) + ")\n" +
+					"*********** CRASH RISK ***********\n");
 		}
 		else {
-		// There are four cases:
-		// 1) Neither aircraft is moving (perhaps they are hovercrafts or helicopters)
-		//
-		// 2a) Either Aircraft moves in only 1 dimension (trajectory is perpendicular to either x axis or y axis)
-		//     We must compare them in a unique manner as their slopes will be 0 or infinity.
-		//
-		// 2b) BOTH Aircraft are moving in 1 dimension and they are perpendicular to each other
-		//     (i.e. AC1 vx == 0, vy != 0    and    AC2 vx !=0, vy == 0)
-		//
-		// 3) Both Aircraft are on parallel trajectories
-		//    We need only concern ourselves with their proximity along the perpendicular line between their trajectories
-		//    We must also evaluate their speed to determine if and when they will come together
-		//    They could potentially be 1-dimensional lines, be careful of divide by 0 and divide by infinity
-		//
-		// 4) They are on trajectories that intersect
-		//    The intersection may occur behind the path of either or both aircraft
-		//    As long as the point of intersection is is ahead of at least one aircraft we must consider it
-		//    Break the detection process into two steps
-		//    First: compare the function of both aircrafts X position with respect to time
-		//    Setting one equal to the other find the point of intersection
-		//    Setting one equal to (the other + minimum X separation distance) find a point at which a potential violation could occur
-		//    Setting that same one to (the other - minimum X separation distance) finds the other point
-		//    These two points represent two times t1 and t2 between which the minimum separation in the x axis is violated
-		//    Repeat the process for the y dimension
-		//    Compare the time interval for the violation of x and y, any overlap indicates a violation
-		//    The lower bound of the higher interval is the time of the violation
-		//    i.e if [t1,t2] and [t3,t4] overlap and t3>t1 then the violation occurs at t3
-
+			int timeToCheck;
 			DoubleLine line1(ac1.cur_pos.px, ac1.cur_pos.py, ac1.cur_vel.vx, ac1.cur_vel.vy);
 			DoubleLine line2(ac2.cur_pos.px, ac2.cur_pos.py, ac2.cur_vel.vx, ac2.cur_vel.vy);
+			if (ac1.holding || ac2.holding) {
+				timeToCheck = min(ac1.holdingTimer,ac2.holdingTimer);
+			}
+			else {
+				timeToCheck = time;
+			}
+			// There are four cases:
+			// 1) Neither aircraft is moving (perhaps they are hovercrafts or helicopters)
+			//
+			// 2a) Either Aircraft moves in only 1 dimension (trajectory is perpendicular to either x axis or y axis)
+			//     We must compare them in a unique manner as their slopes will be 0 or infinity.
+			//
+			// 2b) BOTH Aircraft are moving in 1 dimension and they are perpendicular to each other
+			//     (i.e. AC1 vx == 0, vy != 0    and    AC2 vx !=0, vy == 0)
+			//
+			// 3) Both Aircraft are on parallel trajectories
+			//    We need only concern ourselves with their proximity along the perpendicular line between their trajectories
+			//    We must also evaluate their speed to determine if and when they will come together
+			//    They could potentially be 1-dimensional lines, be careful of divide by 0 and divide by infinity
+			//
+			// 4) They are on trajectories that intersect
+			//    The intersection may occur behind the path of either or both aircraft
+			//    As long as the point of intersection is is ahead of at least one aircraft we must consider it
+			//    Break the detection process into two steps
+			//    First: compare the function of both aircrafts X position with respect to time
+			//    Setting one equal to the other find the point of intersection
+			//    Setting one equal to (the other + minimum X separation distance) find a point at which a potential violation could occur
+			//    Setting that same one to (the other - minimum X separation distance) finds the other point
+			//    These two points represent two times t1 and t2 between which the minimum separation in the x axis is violated
+			//    Repeat the process for the y dimension
+			//    Compare the time interval for the violation of x and y, any overlap indicates a violation
+			//    The lower bound of the higher interval is the time of the violation
+			//    i.e if [t1,t2] and [t3,t4] overlap and t3>t1 then the violation occurs at t3
+
+
 			Intersection intersection{-1.0f, -1.0f, -1.0f}; // Initialize values to "No violation" flag
 
 			if (ac1.cur_vel.vx == 0 && ac1.cur_vel.vy == 0 && ac2.cur_vel.vx == 0 && ac2.cur_vel.vy == 0) {
@@ -80,7 +84,7 @@ void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time
 			else if ((line1.vx * line1.vy == 0.0f || line2.vx * line2.vy == 0.0f) && !line1.parallel(line2)) {
 				// Case #2: At least one of the aircraft is on a trajectory perpendicular to the X or y axis
 
-				intersection =  line1.findViolationPoint(line2, PREDICTION_WINDOW, MIN_SEP_X, MIN_SEP_Y);
+				intersection =  line1.findViolationPoint(line2, timeToCheck, MIN_SEP_X, MIN_SEP_Y);
 
 				/*// First check if the trajectories are perpendicular to each other (we already determined they are not parallel)
 				if (line1.vx * line1.vy == 0.0f && line2.vx * line2.vy == 0.0f) {
@@ -125,8 +129,6 @@ void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time
 
 				// TBD!
 
-
-
 				// ***Note: If aircraft are moving extremely fast this algorithm may fail to detect the violation
 				// distance between two points is sqrt( (x1-x2)^2 + (y1-y2)^2 )
 				float cur_dist = abs(sqrt(pow(line1.px - line2.px,2.0f) + pow(line1.py - line2.py,2.0f)));
@@ -139,7 +141,7 @@ void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time
 					ix = line1.px + it * line1.vx;
 					iy = line1.py + it * line1.vy;
 
-					if (it <= 180.0f) {
+					if (it <= (float)timeToCheck) {
 						intersection = {ix, iy, it};
 					}
 				}
@@ -152,13 +154,15 @@ void PredictSeparationViolation(const Aircraft ac1, const Aircraft ac2, int time
 			}
 			else {
 				// Case #4: Intersecting 2-dimensional lines
-				intersection =  line1.findViolationPoint(line2, PREDICTION_WINDOW, MIN_SEP_X, MIN_SEP_Y);
+				intersection =  line1.findViolationPoint(line2, timeToCheck, MIN_SEP_X, MIN_SEP_Y);
 				/*if (intersection.t >= 0.0f) { // FOR DEBUGGING
 					cout << "CASE#4 ALERT Intersecting two-dimensional trajectories" << endl;
 				}*/
 			}
 			if (intersection.t >= 0.0f) { // We are only concerned with intersections that occur at future points in time
-				cout << ac1.a_id << " - " << ac2.a_id << " violate separation near (" << intersection.x << "," << intersection.y << ") in " << intersection.t << " seconds." << endl;
+				lock_guard<mutex> warninglock(m_WarningMutex);
+				m_Warnings.emplace_back(to_string(ac1.a_id) + " - " + to_string(ac2.a_id) + " violate separation near (" + to_string(intersection.x) + "," + to_string(intersection.y) + ") in " + to_string(ceil(intersection.t)) + " seconds.\n");
+				//cout << ac1.a_id << " - " << ac2.a_id << " violate separation near (" << intersection.x << "," << intersection.y << ") in " << intersection.t << " seconds." << endl;
 			}
 		}
 	}
@@ -180,6 +184,10 @@ void Radar::ProcessTime() {
 		lock_guard<mutex> aircraftlock(m_AircraftMutex);
 		m_Aircrafts = m_Airspace.Scan();
 
+		m_WarningMutex.lock();
+		m_Warnings.clear();
+		m_WarningMutex.unlock();
+
 		//cout << "Aircraft count: " << m_Aircrafts.size() << endl; // FOR DEBUGGING
 
 		// N^2 solution, not great.
@@ -189,16 +197,12 @@ void Radar::ProcessTime() {
 			}
 		}
 		m_Cond_ReportReady.notify_one();
-
-		if (m_Time % LOG_INTERVAL == 0) {
-				// Call the logger
-		}
 	}
 }
 
 bool Radar::AdvanceTime(int seconds) {
 	for (int i = 1; i <= seconds; i++) {
-		{ // Fake scope for lock_guard to die inside
+		{
 			lock_guard<mutex> timelock(m_TimeMutex);
 			m_Time++;
 			if (m_Time % RADAR_INTERVAL == 0) {
@@ -214,4 +218,9 @@ vector<Aircraft> Radar::Report() {
 	unique_lock<mutex> aircraftlock(m_AircraftMutex);
 	m_Cond_ReportReady.wait(aircraftlock);
 	return m_Aircrafts;
+}
+
+vector<string> Radar::Warnings() {
+	lock_guard<mutex> warninglock(m_WarningMutex);
+	return m_Warnings;
 }

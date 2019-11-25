@@ -56,17 +56,96 @@ void Airspace::ProcessMovement() {
 
 		last_time = m_Time;
 
-		// Let all of the aircraft fly one unit of Velocity
+
 		lock_guard<mutex> activelock(m_ActiveMutex);
-		for (auto it = m_Aircrafts.begin(); it != m_Aircrafts.end(); ) {
-			if (it->cur_pos.px < 0 || it->cur_pos.px > 105*5280 || it->cur_pos.py < 0 || it->cur_pos.py > 105*5280) {
-				it = m_Aircrafts.erase(it); // If it leaves our airspace, erase it from the Active Aircraft list
-				// Erase returns an iterator pointing to the next element of our list
-			} else {
-				it->fly();
-				it++;
+		{
+			lock_guard<mutex> broadlock(m_BroadMutex);
+			lock_guard<mutex> msglock(m_MsgMutex);
+			// Let all of the aircraft respond to messages and fly one unit of Velocity
+			for (auto it = m_Aircrafts.begin(); it != m_Aircrafts.end(); ) {
+				if (it->cur_pos.px < 0 || it->cur_pos.px > 105*5280 || it->cur_pos.py < 0 || it->cur_pos.py > 105*5280) {
+					it = m_Aircrafts.erase(it); // If it leaves our airspace, erase it from the Active Aircraft list
+					// Erase returns an iterator pointing to the next element of our list
+				} else {
+					for (auto mit = m_Messages.begin(); mit != m_Messages.end(); ) {
+						if (mit->dest_id == it->a_id) {
+							// do what the message says
+							switch (mit->type) {
+								case 1: { // 1 = Report position and velocity
+									if (it->a_id == -1) {
+										it->a_id = next_unique_id++;
+									}
+									lock_guard<mutex> respmutex(m_ResponseMutex);
+									m_Responses.push_back(it->Response());
+									break;
+								}
+								case 2: { // 2 = Enter holding pattern
+									if (!it->holding) {
+										it->StartHolding();
+									}
+									break;
+								}
+								case 3: { // 3 = Exit holding pattern
+									if (it->holding) {
+										it->StopHolding();
+										it->holdingTimer = PREDICTION_WINDOW;
+									}
+									break;
+								}
+								case 4: { // 4 = Change velocity
+									it->ChangeVelocity(mit->vel);
+									break;
+								}
+								case 5: { // 5 = Change elevation
+									it->ChangeElevation(mit->elevation);
+									break;
+								}
+								default: break;
+							}
+							// delete the message
+							mit = m_Messages.erase(mit);
+						}
+						else {
+							mit++;
+						}
+					}
+					for (auto bit = m_Broadcasts.begin(); bit != m_Broadcasts.end(); ) {
+						// do what the broadcast says
+						switch (bit->type) {
+							case 6: { // 6 = Report position and velocity
+								if (it->a_id == -1) {
+									it->a_id = next_unique_id++;
+								}
+								lock_guard<mutex> respmutex(m_ResponseMutex);
+								m_Responses.push_back(it->Response());
+								break;
+							}
+							case 7: { // 7 = Enter holding pattern
+								if (!it->holding) {
+									it->StartHolding();
+								}
+								break;
+							}
+							case 8: { // 8 = Exit holding pattern
+								if (it->holding) {
+									it->StopHolding();
+									it->holdingTimer = PREDICTION_WINDOW;
+								}
+								break;
+							}
+							default: break;
+						}
+						bit++;
+					}
+					it->fly();
+					it++;
+				}
 			}
+			// delete all broadcasts
+			m_Broadcasts.clear();
 		}
+
+
 		//cout << "FLYING! Elapsed time: " << m_Time << endl;
 
 		// TBD add environment movement
@@ -255,10 +334,6 @@ bool Airspace::ChangeAircraft(Aircraft& ac) {
 	return acDeleted;
 }
 
-Airspace::~Airspace() {
-	// TODO Auto-generated destructor stub
-}
-
 vector<Aircraft> Airspace::Scan() {
 	lock_guard<mutex> activelock(m_ActiveMutex);
 	return m_Aircrafts;
@@ -272,4 +347,25 @@ vector<Aircraft> Airspace::getActiveAircraft() {
 vector<Aircraft> Airspace::getAircraftDataSet() {
 	lock_guard<mutex> datalock(m_DataMutex);
 	return m_A_Dataset;
+}
+
+void Airspace::SendMessage(Message msg) {
+	if (m_SystemOnline) {
+		lock_guard<mutex> msglock(m_MsgMutex);
+		m_Messages.push_back(msg);
+	}
+}
+
+void Airspace::Broadcast(Message brdcst) {
+	if (m_SystemOnline) {
+		lock_guard<mutex> brdcstlock(m_BroadMutex);
+		m_Broadcasts.push_back(brdcst);
+	}
+}
+
+vector<string> Airspace::GetResponses() {
+	lock_guard<mutex> respmutex(m_ResponseMutex);
+	vector<string> returnVector = m_Responses;
+	m_Responses.clear();
+	return returnVector;
 }

@@ -4,6 +4,7 @@
 #include "ATCSystem.h"
 #include "Airspace.h"
 #include "Communications.h"
+#include "Message.h"
 
 using namespace std;
 
@@ -43,8 +44,10 @@ int main() {
 				cout << "Enter a command" << endl;
 				cout << "\t" << pause << ")STOP - Pause Simulation" << endl << endl;
 
-				cout << "\t1)SHOW - Show the Display" << endl;
-				cout << "\t2)VIEW - View active aircraft information" << endl;
+				cout << "\t1)SHOW - Show the display" << endl;
+				cout << "\t2)SEND - View aircraft and send messages" << endl;
+				cout << "\t3)MESG - View received messages" << endl;
+				cout << "\t4)HIST - View the history log file" << endl;
 
 				cout << endl << "\t" << exit << ")Exit application" << endl;
 				// Maybe put a confirmation for exit
@@ -87,12 +90,11 @@ int main() {
 						if (cmd == '1') { // Send a message to an identifies aircraft
 							int aid = 0;
 							while (aid != escape) {
-								for (Aircraft& ac : AircraftsCopy) {
-									ac.PrintFullMembers();
-								}
+
 
 								cout << "Enter a command" << endl;
-								cout << "\t" << escape << ")Back to previous menu" << endl << endl;
+								cout << "\t" << escape << ")Back to previous menu" << endl;
+								cout << "\t-5) Display aircraft information" << endl << endl;
 
 								cout << "\tEnter the ID of the Aircraft you wish to message" << endl;
 
@@ -105,6 +107,12 @@ int main() {
 										cin.clear();
 										cin.ignore(10000, '\n');
 									}
+									else if (aid == -5) {
+										AircraftsCopy = sys.getAircraft();
+										for (Aircraft& ac : AircraftsCopy) {
+											ac.PrintMembers();
+										}
+									}
 									else{
 										auto it = find_if(AircraftsCopy.begin(), AircraftsCopy.end(), [&aid](const Aircraft& ac) {return ac.a_id == aid;});
 
@@ -116,9 +124,10 @@ int main() {
 												cout << "\t" << back << ")Back to previous menu" << endl << endl;
 
 												cout << "\t1)Report position" << endl;
-												cout << "\t2)Toggle holding pattern" << endl;
-												cout << "\t3)Change velocity" << endl;
-												cout << "\t4)Change elevation" << endl;
+												cout << "\t2)Enter holding pattern" << endl;
+												cout << "\t3)Exit holding pattern" << endl;
+												cout << "\t4)Change velocity" << endl;
+												cout << "\t5)Change elevation" << endl;
 
 
 												// Maybe put a confirmation for exit
@@ -126,17 +135,39 @@ int main() {
 												msg = '\0';
 												cin >> msg;
 
+												Message message;
+												message.dest_id = it->a_id;
+
 												if (msg == '1') { // Report position
-													//comms.reportPosition(id);
+													message.type = 1;
+													sys.SendComms(message);
 												}
-												else if (msg == '2') {
-													//comms.toggleHolding(id);
+												else if (msg == '2') { // Enter holding pattern
+													message.type = 2;
+													sys.SendComms(message);
 												}
-												else if (msg == '3') {
-													//comms.changeVelocity(id,velocity)
+												else if (msg == '3') { // Exit holding pattern
+													message.type = 3;
+													sys.SendComms(message);
 												}
-												else if (msg == '4') {
-													//comms.changeElevation(id,elevation)
+												else if (msg == '4') { // Change velocity
+													message.type = 4;
+													Velocity v;
+													cout << endl << "\tEnter X Velocity: ";
+													cin >> v.vx;
+													cout << endl << "\tEnter Y Velocity: ";
+													cin >> v.vy;
+													cout << endl << "\tEnter Z Velocity: ";
+													cin >> v.vz;
+													message.vel = v;
+													sys.SendComms(message);
+												}
+												else if (msg == '5') { // Change elevation
+													message.type = 5;
+													cout << "Current elevation: " << it->cur_pos.pz << endl;
+													cout << endl << "\tEnter Z Position: ";
+													cin >> message.elevation;
+													sys.SendComms(message);
 												}
 											}
 										}
@@ -148,15 +179,72 @@ int main() {
 							}
 						}
 						else if (cmd == '2') { // Broadcast a message
-							// Enter holding pattern
-							// comms.broadcastHold();
-							// Report
-							// comms.broadcastReport();
+							char msg = '\0';
+							while (msg != back) {
+								cout << "Choose a broadcast to send" << endl;
+								cout << "\t" << back << ")Back to previous menu" << endl << endl;
+
+								cout << "\t1)Report positions and velocities" << endl;
+								cout << "\t2)Enter holding pattern" << endl;
+								cout << "\t3)Exit holding pattern" << endl;
+
+
+								// Maybe put a confirmation for exit
+
+								msg = '\0';
+								cin >> msg;
+
+								Message message;
+
+								if (msg == '1') { // Report position and velocity
+									message.type = 6;
+									sys.SendComms(message);
+								}
+								else if (msg == '2') { // Enter holding pattern
+									message.type = 7;
+									sys.SendComms(message);
+								}
+								else if (msg == '3') { // Exit holding pattern
+									message.type = 8;
+									sys.SendComms(message);
+								}
+							}
 						}
 					}
-
 				}
-			}
+				else if (input == '3') { // View received messages
+					char cmd = '\0';
+					while (cmd != back) {
+						sys.showMessages();
+						cout << endl << "Simulation status: RUNNING" << endl << endl;
+
+						cout << "Enter a command" << endl;
+						cout << "\t" << back << ")Back to previous menu" << endl << endl;
+
+						cout << "\t1)Delete messages" << endl;
+
+						cmd = '\0';
+						cin >> cmd;
+
+						if (cmd == '1') {
+							sys.clearMessages();
+						}
+					}
+				}
+				else if (input == '4') { // View aircraft history log
+					sys.ReadLog();
+					char cmd = '\0';
+					while (cmd != back) {
+						cout << endl << "Simulation status: RUNNING" << endl << endl;
+
+						cout << "Enter a command" << endl;
+						cout << "\t" << back << ")Back to previous menu" << endl << endl;
+
+						cmd = '\0';
+						cin >> cmd;
+					}
+				}
+			} // while (input != exit && input != pause)
 			sys.Pause();
 		}
 		else if (input == '1') { // List information for ALL aircraft

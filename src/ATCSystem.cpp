@@ -11,12 +11,9 @@ ATC_System& ATC_System::getInstance() {
 	return _instance;
 }
 
-
 ATC_System::ATC_System() {
-
 	m_ProcessingThread = new thread{ &ATC_System::process_time, this };
 	cout << "Display instantiated" << endl;
-	//this->aircraft = NULL;		// initialize to NULL to suppress IDE warning
 }
 
 
@@ -53,7 +50,6 @@ void ATC_System::print_grid(){
 				cout << "|";
 			}
 
-			// TODO: PRINT AIRPLANES HERE
 			cout << check_position(j, i);
 
 		}
@@ -66,13 +62,8 @@ void ATC_System::print_grid(){
 	cout << string(grid_size_x+columns+1, '-') << endl;
 }
 
-
-void ATC_System::link_aircraft(const vector<Aircraft> &ac){
-	//aircraft = &ac;
-}
-
 char ATC_System::check_position(const int x, const int y) const{
-	for(auto& ac : aircraft){
+	for(auto& ac : m_Aircraft){
 		if(ac.grid_pos.px == x && ac.grid_pos.py == y){
 			return 90 - ceil((float)ac.grid_pos.pz/min_z_sep);
 		}
@@ -80,13 +71,7 @@ char ATC_System::check_position(const int x, const int y) const{
 	return 0;
 }
 
-
-ATC_System::~ATC_System() {
-	// TODO Auto-generated destructor stub
-}
-
 void ATC_System::process_time() {
-	int last_time = 0;
 	while (m_SystemOnline)
 	{
 		// Wait for a unit of time to pass
@@ -99,8 +84,6 @@ void ATC_System::process_time() {
 			 { return (current_time > lt); });*/
 			// To prevent spurious wakeup make sure time has actually passed
 
-		last_time = m_Time; // This might be unnecessary here
-
 		while (!m_Paused) {
 			m_Time++;
 			// Get current timestamp
@@ -112,38 +95,56 @@ void ATC_System::process_time() {
 
 			if (m_Time % RADAR_INTERVAL == 0) {
 				lock_guard<mutex> aircraftlock(m_AircraftMutex);
-				aircraft = radar.Report();
+				m_Aircraft = radar.Report();
+				lock_guard<mutex> warninglock(m_WarningMutex);
+				m_Warnings.clear();
+				m_Warnings = radar.Warnings();
 			}
 
-			/*if (m_Time % DISPLAY_INTERVAL == 0) {
-				link_aircraft(aircraft);
-				print_grid();
-				for (Aircraft ac : aircraft) {
-					ac.PrintMembers();
-				}
-			}*/
-
 			if (m_Show_Display && m_Time % DISPLAY_INTERVAL == 0) {
+				if (m_Time % RADAR_INTERVAL != 0) { // Locally predict aircraft movement between radar scans
+					for (Aircraft& ac : m_Aircraft) {
+						ac.fly(DISPLAY_INTERVAL);
+					}
+				}
+				else { // Don't reprint outdated radar warnings
+					for (string& s : m_Warnings) {
+						cout << s;
+					}
+				}
 				print_grid();
+			}
+
+			{
+				lock_guard<mutex> resplock(m_ResponseMutex);
+				vector<string> tempCopy = comms.GetResponses();
+				m_Responses.insert(m_Responses.end(), tempCopy.begin(), tempCopy.end());
+			}
+
+			if (m_Time % LOG_INTERVAL == 0) {
+				lock_guard<mutex> aircraftlock(m_AircraftMutex);
+				m_Logger.Log(m_Aircraft);
 			}
 
 			// Wait for difference between 1000 milliseconds and elapsed time since start of loop
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 			auto int_ms = m_Milliwait - std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 			std::this_thread::sleep_for(std::chrono::milliseconds(max((int)int_ms,1)));
+			//cout << "Running..." << endl; // FOR DEBUGGING
 		}
 	}
 }
 
 void ATC_System::show_plan(bool mode) {
+	print_grid();
+	for (string& s : m_Warnings) {
+		cout << s;
+	}
 	m_Show_Display = mode;
 }
 
 void ATC_System::Resume() {
 	m_Paused = false;
-	cout << endl << "Resuming simulation...";
-	std::this_thread::sleep_for(std::chrono::milliseconds(m_Milliwait));
-	cout << "GO." << endl;
 	m_Cond_Time.notify_one();
 }
 
@@ -153,5 +154,30 @@ void ATC_System::Pause() {
 
 vector<Aircraft> ATC_System::getAircraft() {
 	lock_guard<mutex> aircraftlock(m_AircraftMutex);
-	return aircraft;
+	return m_Aircraft;
+}
+
+void ATC_System::SendComms(Message message) {
+	comms.QueueMessage(message);
+}
+
+void ATC_System::showMessages() {
+	lock_guard<mutex> resplock(m_ResponseMutex);
+	if (m_Responses.empty()) {
+		cout << "No messages to display." << endl;
+	}
+	else {
+		for (string msg : m_Responses) {
+			cout << msg;
+		}
+	}
+}
+
+void ATC_System::clearMessages() {
+	lock_guard<mutex> resplock(m_ResponseMutex);
+	m_Responses.clear();
+}
+
+void ATC_System::ReadLog() {
+	m_Logger.Read();
 }
