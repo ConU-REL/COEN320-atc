@@ -46,7 +46,7 @@ int main() {
 
 				cout << "\t1)SHOW - Show the display" << endl;
 				cout << "\t2)SEND - View aircraft and send messages" << endl;
-				cout << "\t3)MESG - View received messages" << endl;
+				cout << "\t3)RECV - View received messages" << endl;
 				cout << "\t4)HIST - View the history log file" << endl;
 
 				cout << endl << "\t" << exit << ")Exit application" << endl;
