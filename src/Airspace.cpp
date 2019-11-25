@@ -249,7 +249,7 @@ bool Airspace::ChangeAircraft(Aircraft& ac) {
 		cout << "\t" << edit << ")Edit" << endl;
 		cout << "\t" << del << ")Delete" << endl;
 		//cout << "\t1)Add an aircraft" << endl;
-		cout << endl << "\t" << exit << ")Cancel" << endl;
+		cout << endl << "\t" << exit << ")Back to previous menu" << endl;
 
 		cin >> input;
 
@@ -311,6 +311,7 @@ bool Airspace::ChangeAircraft(Aircraft& ac) {
 				cout << "CONFIRM DELETION" << endl;
 				cout << "\tThis action cannot be undone!" << endl;
 				cout << "\tEnter '" << conf << "' to confirm deletion." << endl;
+				cout << "\tEnter 'B' to cancel." << endl;
 
 				cin >> confirm;
 

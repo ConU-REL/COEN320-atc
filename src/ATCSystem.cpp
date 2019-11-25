@@ -103,6 +103,7 @@ void ATC_System::process_time() {
 
 			if (m_Show_Display && m_Time % DISPLAY_INTERVAL == 0) {
 				if (m_Time % RADAR_INTERVAL != 0) { // Locally predict aircraft movement between radar scans
+					lock_guard<mutex> aircraftlock(m_AircraftMutex);
 					for (Aircraft& ac : m_Aircraft) {
 						ac.fly(DISPLAY_INTERVAL);
 					}
