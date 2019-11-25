@@ -1,5 +1,6 @@
 #pragma once
 
+//#include "ATCSystem.h" // creates cyclic dependency
 #include "Logger.h"
 #include "Airspace.h"
 #include "Aircraft.h"

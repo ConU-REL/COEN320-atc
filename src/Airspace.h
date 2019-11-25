@@ -7,9 +7,10 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <cmath>
 #include "Aircraft.h"
 
-// For now I've put these definitions here but there should perhaps be a better place
+// To counteract cyclic dependency these parameter are listed here
 #define RADAR_INTERVAL 5
 #define DISPLAY_INTERVAL 5
 #define LOG_INTERVAL 15
@@ -27,9 +28,9 @@ public:
 
 	bool AdvanceTime(int seconds = 1);
 	void AddAircraft();
-	void ChangeAircraft(int);
-	void displayActiveAircraft();
-	void displayAircraftDataSet();
+	bool ChangeAircraft(Aircraft&);
+	std::vector<Aircraft> getActiveAircraft();
+	std::vector<Aircraft> getAircraftDataSet();
 
 private:
 	int next_unique_id = 0;

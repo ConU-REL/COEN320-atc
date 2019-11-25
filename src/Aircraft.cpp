@@ -22,8 +22,10 @@ Aircraft::~Aircraft() {
 }
 
 void Aircraft::fly(int time) {
-	cur_pos += cur_vel;
-	cur_pos.pz = cur_pos.pz - cur_vel.vz; // Ignore z axis in our airspace
+	for (int i = 0; i < time; i++) {
+		cur_pos += cur_vel;
+		cur_pos.pz = cur_pos.pz - cur_vel.vz; // Ignore z axis in our airspace
+	}
 
 	grid_pos.px = ceil((float)(cur_pos.px/5280)/3);
 	grid_pos.py = ceil((float)(cur_pos.py/5280)/3);
@@ -38,4 +40,17 @@ void Aircraft::PrintMembers() const {
 	}
 	cout << "POSITION: " << cur_pos.px << "," << cur_pos.py << "," << cur_pos.pz << " "
 			"VELOCITY: " << cur_vel.vx << "," << cur_vel.vy << "," << cur_vel.vz << " " << endl;
+}
+
+void Aircraft::PrintFullMembers() const {
+	cout << "SID: " << s_id;
+	if (a_id == -1) {
+		cout << " AID: UNKNOWN ";
+	}
+	else {
+		cout << " AID:" << a_id << " ";
+	}
+	cout << "POSITION: " << cur_pos.px << "," << cur_pos.py << "," << cur_pos.pz << " "
+			"VELOCITY: " << cur_vel.vx << "," << cur_vel.vy << "," << cur_vel.vz << " "
+			"ENTRY TIME: " << a_et << endl;
 }

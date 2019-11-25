@@ -17,5 +17,6 @@ public:
 	virtual ~Aircraft();
 
 	void PrintMembers() const;
+	void PrintFullMembers() const;
 	void fly(int time = 1); // Move aircraft according to velocity
 };

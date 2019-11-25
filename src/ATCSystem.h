@@ -1,14 +1,26 @@
 #pragma once
 
+#include "Radar.h"
 #include "Aircraft.h"
 #include "Airspace.h"
-#include "Radar.h"
 #include "Communications.h"
 #include <mutex>
 #include <condition_variable>
 #include <vector>
 #include <chrono>
 #include <algorithm>
+
+/*
+// System parameters // I would love to declare them here but it creates cyclic dependencies
+#define RADAR_INTERVAL 5
+#define DISPLAY_INTERVAL 5
+#define LOG_INTERVAL 15
+#define PREDICTION_WINDOW 180
+
+#define MIN_SEP_X 3*5280
+#define MIN_SEP_Y 3*5280
+#define MIN_SEP_Z 1000
+*/
 
 using namespace std;
 
@@ -20,14 +32,13 @@ public:
 	void link_aircraft(const vector<Aircraft> &ac);
 	void print_grid();
 
-
-
 	void process_time();
 
 	void show_plan(bool);
 
 	void Resume();
 	void Pause();
+	vector<Aircraft> getAircraft();
 
 private:
 	int m_Milliwait = 100;
@@ -36,6 +47,7 @@ private:
 	bool m_Paused = true;
 	bool m_Show_Display = false;
 	std::mutex m_TimeMutex; // For accessing time
+	std::mutex m_AircraftMutex; // For accessing time
 	std::condition_variable m_Cond_Time;
 
 
