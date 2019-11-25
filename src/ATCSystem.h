@@ -4,6 +4,8 @@
 #include "Aircraft.h"
 #include "Airspace.h"
 #include "Communications.h"
+#include "Logger.h"
+#include "Message.h"
 #include <mutex>
 #include <condition_variable>
 #include <vector>
@@ -22,14 +24,10 @@
 #define MIN_SEP_Z 1000
 */
 
-using namespace std;
-
 class ATC_System {
 
 public:
 	static ATC_System& getInstance();
-	void print();
-	void link_aircraft(const vector<Aircraft> &ac);
 	void print_grid();
 
 	void process_time();
@@ -38,23 +36,32 @@ public:
 
 	void Resume();
 	void Pause();
-	vector<Aircraft> getAircraft();
+	std::vector<Aircraft> getAircraft();
+
+	void SendComms(Message);
+	void showMessages();
+	void clearMessages();
+	void ReadLog();
 
 private:
-	int m_Milliwait = 100;
+	int m_Milliwait = 1000;
 	int m_Time = 0;
 	bool m_SystemOnline = true;
 	bool m_Paused = true;
 	bool m_Show_Display = false;
 	std::mutex m_TimeMutex; // For accessing time
 	std::mutex m_AircraftMutex; // For accessing time
+	std::mutex m_WarningMutex; // For accessing time
+	std::mutex m_ResponseMutex; // For accessing time
 	std::condition_variable m_Cond_Time;
+
 
 
 
 	Airspace& airspace = Airspace::getInstance();
 	Communications& comms = Communications::getInstance();
 	Radar& radar = Radar::getInstance();
+	Logger& m_Logger = Logger::getInstance();
 
 	std::thread* m_ProcessingThread = nullptr;
 
@@ -70,12 +77,13 @@ private:
 	int min_z_sep = 1000;		// minimum aircraft z separation in feet
 	// end environment properties
 	int quadrant_size = 4;		// number of rows and columns per quadrant
-	vector<Aircraft> aircraft;	// pointer to vector of known aircraft
+	std::vector<Aircraft> m_Aircraft;	// vector of known aircraft
+	std::vector<std::string> m_Warnings; // vector of most recent warnings
+	std::vector<std::string> m_Responses; // vector of all pilot messages received
 
 	// member functions
 	char check_position(const int x, const int y) const;
 
 	// constructors
 	ATC_System();
-	virtual ~ATC_System();
 };
