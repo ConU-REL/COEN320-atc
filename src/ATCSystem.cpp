@@ -111,6 +111,7 @@ void ATC_System::process_time() {
 			radar.AdvanceTime();
 
 			if (m_Time % RADAR_INTERVAL == 0) {
+				lock_guard<mutex> aircraftlock(m_AircraftMutex);
 				aircraft = radar.Report();
 			}
 
@@ -148,4 +149,9 @@ void ATC_System::Resume() {
 
 void ATC_System::Pause() {
 	m_Paused = true;
+}
+
+vector<Aircraft> ATC_System::getAircraft() {
+	lock_guard<mutex> aircraftlock(m_AircraftMutex);
+	return aircraft;
 }

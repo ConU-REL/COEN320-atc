@@ -112,72 +112,147 @@ bool CompareAircraft(Aircraft a1, Aircraft a2) {
 	return a1.a_et < a2.a_et;
 }
 
+void Airspace::AddAircraft() {
+	int entry_time = 0;
+	cout << "Specify the aircraft parameters" << endl <<
+			"(AID, Position, Velocity, Entry Time)" << endl;
+	Aircraft newAc;
+	newAc.s_id = next_unique_id++;
+	cout << endl << "\tEnter Aircraft ID: ";
+	cin >> newAc.a_id;
+	cout << endl << "\tEnter X Position: ";
+	cin >> newAc.cur_pos.px;
+	cout << endl << "\tEnter Y Position: ";
+	cin >> newAc.cur_pos.py;
+	cout << endl << "\tEnter Z Position: ";
+	cin >> newAc.cur_pos.pz;
+	cout << endl << "\tEnter X Velocity: ";
+	cin >> newAc.cur_vel.vx;
+	cout << endl << "\tEnter Y Velocity: ";
+	cin >> newAc.cur_vel.vy;
+	cout << endl << "\tEnter Z Velocity: ";
+	cin >> newAc.cur_vel.vz;
+	cout << endl << "\tEnter aircraft Entry Time: ";
+	cin >> newAc.a_et;
+
+	newAc.grid_pos.px = ceil((float)(newAc.cur_pos.px/5280)/3);
+	newAc.grid_pos.py = ceil((float)(newAc.cur_pos.py/5280)/3);
+	newAc.grid_pos.pz = newAc.cur_pos.pz;
+
+	lock_guard<mutex> timelock(m_TimeMutex);
+	if (entry_time > m_Time) { // If this aircraft is entering our system at a later time
+		lock_guard<mutex> datalock(m_DataMutex);
+		m_A_Dataset.push_back(newAc);
+		// Always sort the Data Set by entry time
+		sort(m_A_Dataset.begin(), m_A_Dataset.end(), CompareAircraft);
+	}
+	else { // The aircraft is appearing in our system immediately
+		lock_guard<mutex> activelock(m_ActiveMutex);
+		m_Aircrafts.push_back(newAc);
+	}
+}
+
 // This function can only be called when simulation time has been stopped
-void Airspace::ChangeAircraft() {
-	int input = 0;
-	const int exit = 4; // The last option of our main menu
-	while (input != exit) {
-		cout << "Choose action:" << endl << endl;
-		cout << "\t1)Add an aircraft" << endl;
-		cout << "\t2)Delete an aircraft" << endl;
-		cout << "\t3)Edit an aircraft" << endl;
+bool Airspace::ChangeAircraft(Aircraft& ac) {
+	bool acDeleted = false;
+
+	char input = '\0';
+	const char edit = 'E';
+	const char del = 'D';
+	const char conf = 'C';
+	const char exit = 'B'; // The last option of our main menu
+	while (!acDeleted && input != exit) {
+		cout << "SID: " << ac.s_id << " A";
+		ac.PrintMembers();
+
+		cout << endl << "Choose action for this aircraft" << endl << endl;
+
+		cout << "\t" << edit << ")Edit" << endl;
+		cout << "\t" << del << ")Delete" << endl;
+		//cout << "\t1)Add an aircraft" << endl;
 		cout << endl << "\t" << exit << ")Cancel" << endl;
+
+		cin >> input;
 
 		switch (input) {
 			case exit: break;
-			case 1: { // Add
-				int entry_time = 0;
-				cout << "Specify the aircraft parameters" << endl <<
-						"(ID, Position, Velocity, Entry Time)" << endl;
-				Aircraft newAc;
-				cout << endl << "\tEnter aircraft Id: ";
-				cin >> newAc.a_id;
-				cout << endl << "\tEnter X Position: ";
-				cin >> newAc.cur_pos.px;
-				cout << endl << "\tEnter Y Position: ";
-				cin >> newAc.cur_pos.py;
-				cout << endl << "\tEnter Z Position: ";
-				cin >> newAc.cur_pos.pz;
-				cout << endl << "\tEnter X Velocity: ";
-				cin >> newAc.cur_vel.vx;
-				cout << endl << "\tEnter Y Velocity: ";
-				cin >> newAc.cur_vel.vy;
-				cout << endl << "\tEnter Z Velocity: ";
-				cin >> newAc.cur_vel.vz;
-				cout << endl << "\tEnter aircraft Entry Time: ";
-				cin >> entry_time;
-				newAc.a_et = entry_time;
+			case edit: {// Edit
+				cout << endl << "\tNew Aircraft ID: ";
+				cin >> ac.a_id;
+				cout << endl << "\tNew X Position: ";
+				cin >> ac.cur_pos.px;
+				cout << endl << "\tNew Y Position: ";
+				cin >> ac.cur_pos.py;
+				cout << endl << "\tNew Z Position: ";
+				cin >> ac.cur_pos.pz;
+				cout << endl << "\tNew X Velocity: ";
+				cin >> ac.cur_vel.vx;
+				cout << endl << "\tNew Y Velocity: ";
+				cin >> ac.cur_vel.vy;
+				cout << endl << "\tNew Z Velocity: ";
+				cin >> ac.cur_vel.vz;
 
-				lock_guard<mutex> timelock(m_TimeMutex);
-				if (entry_time > m_Time) { // If this aircraft is entering our system at a later time
-					lock_guard<mutex> datalock(m_DataMutex);
-					m_A_Dataset.push_back(newAc);
-					// Always sort the Data Set by entry time
-					sort(m_A_Dataset.begin(), m_A_Dataset.end(), CompareAircraft);
-				}
-				else { // The aircraft is appearing in our system immediately
+				ac.grid_pos.px = ceil((float)(ac.cur_pos.px/5280)/3);
+				ac.grid_pos.py = ceil((float)(ac.cur_pos.py/5280)/3);
+				ac.grid_pos.pz = ac.cur_pos.pz;
+
+				bool editComplete = false;
+				{
 					lock_guard<mutex> activelock(m_ActiveMutex);
-					m_Aircrafts.push_back(newAc);
+					auto it = find_if(m_Aircrafts.begin(), m_Aircrafts.end(), [&sid = ac.s_id](const Aircraft& ac_2) {return ac_2.s_id == sid;});
+
+					if (it != m_Aircrafts.end())
+					{
+					  // found element. 'it' is an iterator to the first matching element
+					  *it = ac;
+					  editComplete = true;
+					}
 				}
+
+				if (!editComplete) {
+					{
+						lock_guard<mutex> datalock(m_DataMutex);
+						auto it = find_if(m_A_Dataset.begin(), m_A_Dataset.end(), [&sid= ac.s_id](const Aircraft& ac_2) {return ac_2.s_id == sid;});
+
+						if (it != m_A_Dataset.end())
+						{
+						  // found element. 'it' is an iterator to the first matching element
+						  *it = ac;
+						  // Always sort the Data Set by entry time
+						  sort(m_A_Dataset.begin(), m_A_Dataset.end(), CompareAircraft);
+						}
+					}
+				}
+
 				break;
 			}
-			case 2: { // Delete
-				cout << "TBD DELETE BY ID" << endl;
-				cout << "ASK USER IF THEY WANT TO DELETE FROM FUTURE OR ACTIVE AIRCRAFT" << endl;
-				cout << "LIST THOSE AIRCRAFT" << endl;
-				cout << "PROMPT USER FOR SYSTEM ID OF AIRCRAFT" << endl;
-				cout << "DELETE THAT AIRCRAFT" << endl;
+			case del: { // Delete
+				char confirm = '\0';
 
-					//m_A_Dataset.erase();
-					break;
-			}
-			case 3: {// Edit
-				cout << "TBD SIMILAR TO ADD" << endl;
-					break;
+				cout << "CONFIRM DELETION" << endl;
+				cout << "\tThis action cannot be undone!" << endl;
+				cout << "\tEnter '" << conf << "' to confirm deletion." << endl;
+
+				cin >> confirm;
+
+				if (confirm == conf) {
+					lock_guard<mutex> datalock(m_DataMutex);
+					auto it = find_if(m_A_Dataset.begin(), m_A_Dataset.end(), [&sid= ac.s_id](const Aircraft& ac_2) {return ac_2.s_id == sid;});
+
+					if (it != m_A_Dataset.end())
+					{
+						m_A_Dataset.erase(it);
+						/*auto index = std::distance(m_A_Dataset.begin(), it);
+						m_A_Dataset[index].erase();*/
+						acDeleted = true;
+					}
+				}
+				break;
 			}
 			default: break;
 		}
 	}
+	return acDeleted;
 }
 
 Airspace::~Airspace() {
@@ -187,4 +262,14 @@ Airspace::~Airspace() {
 vector<Aircraft> Airspace::Scan() {
 	lock_guard<mutex> activelock(m_ActiveMutex);
 	return m_Aircrafts;
+}
+
+vector<Aircraft> Airspace::getActiveAircraft() {
+	lock_guard<mutex> activelock(m_ActiveMutex);
+	return m_Aircrafts;
+}
+
+vector<Aircraft> Airspace::getAircraftDataSet() {
+	lock_guard<mutex> datalock(m_DataMutex);
+	return m_A_Dataset;
 }
