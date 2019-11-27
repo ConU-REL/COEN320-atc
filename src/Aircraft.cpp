@@ -53,18 +53,22 @@ void Aircraft::fly(int time) {
 			if (cur_pos.pz < targetElevation) { // We need to ascend
 				if (cur_pos.pz + ASCENT_VELOCITY > targetElevation) { // Don't overshoot
 					cur_pos.pz = targetElevation;
+					cur_vel.vz = storage_vel.vz;
 					ascendDescend = false;
 				}
 				else {
+					cur_vel.vz = ASCENT_VELOCITY;
 					cur_pos.pz = cur_pos.pz + ASCENT_VELOCITY;
 				}
 			}
 			else { // We need to descend // Also triggers if we happened to exactly hit our target
 				if (cur_pos.pz - ASCENT_VELOCITY < targetElevation) { // Don't overshoot
 					cur_pos.pz = targetElevation;
+					cur_vel.vz = storage_vel.vz;
 					ascendDescend = false;
 				}
 				else {
+					cur_vel.vz = -ASCENT_VELOCITY;
 					cur_pos.pz = cur_pos.pz - ASCENT_VELOCITY;
 				}
 			}
@@ -126,4 +130,14 @@ void Aircraft::ChangeVelocity(Velocity newVel) {
 void Aircraft::ChangeElevation(int elevation) {
 	targetElevation = elevation;
 	ascendDescend = true;
+	if (cur_pos.pz == targetElevation) {
+		cur_vel.vz = 0;
+	}
+	else if (cur_pos.pz < targetElevation) {
+		cur_vel.vz = ASCENT_VELOCITY;
+	}
+	else {
+		cur_vel.vz = -ASCENT_VELOCITY;
+	}
+
 }
