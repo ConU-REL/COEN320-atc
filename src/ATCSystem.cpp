@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 ATC_System& ATC_System::getInstance() {
 	static ATC_System _instance;
 	return _instance;
@@ -15,7 +14,6 @@ ATC_System::ATC_System() {
 	m_ProcessingThread = new thread{ &ATC_System::process_time, this };
 	cout << "Display instantiated" << endl;
 }
-
 
 void ATC_System::print_grid(){
 	int grid_size_x = ceil((float)(x_size / min_x_sep) / quadrant_size) * quadrant_size;
@@ -79,10 +77,6 @@ void ATC_System::process_time() {
 		m_Cond_Time.wait(timelock,
 					[&paused = m_Paused]
 					 { return (paused == false); });
-		/*m_Cond_Time.wait(timelock,
-			[&current_time = m_Time, &lt = last_time]
-			 { return (current_time > lt); });*/
-			// To prevent spurious wakeup make sure time has actually passed
 
 		while (!m_Paused) {
 			m_Time++;
