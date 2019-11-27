@@ -187,6 +187,7 @@ bool Airspace::AdvanceTime(int seconds) {
 	return true;
 }
 
+// We sort aircraft by entry time, lowest (earliest) first
 bool CompareAircraft(Aircraft a1, Aircraft a2) {
 	return a1.a_et < a2.a_et;
 }

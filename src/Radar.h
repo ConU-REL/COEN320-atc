@@ -11,7 +11,6 @@
 class Radar {
 public:
 	static Radar& getInstance();
-	void CollisionPrediction(int period = 180);
 	bool AdvanceTime(int seconds = 1);
 	std::vector<Aircraft> Report();
 	std::vector<std::string> Warnings();

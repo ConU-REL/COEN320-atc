@@ -44,7 +44,7 @@ public:
 	void ReadLog();
 
 private:
-	int m_Milliwait = 1000;
+	int m_Milliwait = 50;
 	int m_Time = 0;
 	bool m_SystemOnline = true;
 	bool m_Paused = true;
