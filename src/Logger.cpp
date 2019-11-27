@@ -26,7 +26,7 @@ void Logger::ProcessEntries() {
 		// copy the data to a local var
 		vector<string> copy{ m_Data };
 
-		// clear the message list
+		// clear the data
 		m_Data.clear();
 
 		// release lock

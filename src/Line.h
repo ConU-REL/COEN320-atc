@@ -17,7 +17,6 @@ struct Line { // Used for x(t) and y(t) individually
 };
 
 struct DoubleLine : public Line { // Used for lines which are x and y (collectively) as a function of time
-	// This is a line
 	float vx, vy;
 
 	DoubleLine(int, int, int, int);

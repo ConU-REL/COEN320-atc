@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <vector>
 #include <iostream>
 #include <map>
@@ -49,7 +48,6 @@ private:
 	std::vector<Message> m_Messages;
 	std::vector<Aircraft> m_A_Dataset;
 	std::vector<Aircraft> m_Aircrafts;
-	//std::vector<Environment> m_Environment;
 
 	std::thread* m_ProcessingThread = nullptr;
 

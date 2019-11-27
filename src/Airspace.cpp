@@ -56,7 +56,6 @@ void Airspace::ProcessMovement() {
 
 		last_time = m_Time;
 
-
 		lock_guard<mutex> activelock(m_ActiveMutex);
 		{
 			lock_guard<mutex> broadlock(m_BroadMutex);
@@ -145,11 +144,6 @@ void Airspace::ProcessMovement() {
 			m_Broadcasts.clear();
 		}
 
-
-		//cout << "FLYING! Elapsed time: " << m_Time << endl;
-
-		// TBD add environment movement
-
 		if (m_Next_Event <= m_Time) {
 			// Determine how many aircraft in the data set have entered our system
 			int i=0;
@@ -170,8 +164,6 @@ void Airspace::ProcessMovement() {
 				m_Aircrafts.insert(m_Aircrafts.end(),m_A_Dataset.begin(),m_A_Dataset.begin()+i);
 				m_A_Dataset.erase(m_A_Dataset.begin(),m_A_Dataset.begin()+i);
 			}
-
-			// TBD add environment
 		}
 	}
 }

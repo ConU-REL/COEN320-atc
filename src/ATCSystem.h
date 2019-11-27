@@ -44,7 +44,7 @@ public:
 	void ReadLog();
 
 private:
-	int m_Milliwait = 50;
+	int m_Milliwait = 1000;
 	int m_Time = 0;
 	bool m_SystemOnline = true;
 	bool m_Paused = true;
@@ -55,16 +55,12 @@ private:
 	std::mutex m_ResponseMutex; // For accessing time
 	std::condition_variable m_Cond_Time;
 
-
-
-
 	Airspace& airspace = Airspace::getInstance();
 	Communications& comms = Communications::getInstance();
 	Radar& radar = Radar::getInstance();
 	Logger& m_Logger = Logger::getInstance();
 
 	std::thread* m_ProcessingThread = nullptr;
-
 
 	// member variables
 	// environment properties
