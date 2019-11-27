@@ -43,13 +43,37 @@ void Aircraft::fly(int time) {
 				holdingTimer = HOLDING_TIMER;
 			}
 		}
-		cur_pos += cur_vel;
-		cur_pos.pz = cur_pos.pz - cur_vel.vz; // Ignore z axis in our airspace
+		else {
+			cur_pos += cur_vel;
+			cur_pos.pz = cur_pos.pz - cur_vel.vz; // Ignore z axis in our airspace under normal conditions
 
+		}
+
+		if (ascendDescend) {
+			if (cur_pos.pz < targetElevation) { // We need to ascend
+				if (cur_pos.pz + ASCENT_VELOCITY > targetElevation) { // Don't overshoot
+					cur_pos.pz = targetElevation;
+					ascendDescend = false;
+				}
+				else {
+					cur_pos.pz = cur_pos.pz + ASCENT_VELOCITY;
+				}
+			}
+			else { // We need to descend // Also triggers if we happened to exactly hit our target
+				if (cur_pos.pz - ASCENT_VELOCITY < targetElevation) { // Don't overshoot
+					cur_pos.pz = targetElevation;
+					ascendDescend = false;
+				}
+				else {
+					cur_pos.pz = cur_pos.pz - ASCENT_VELOCITY;
+				}
+			}
+		}
+
+		grid_pos.px = ceil((float)(cur_pos.px/5280)/3);
+		grid_pos.py = ceil((float)(cur_pos.py/5280)/3);
+		grid_pos.pz = cur_pos.pz;
 	}
-
-	grid_pos.px = ceil((float)(cur_pos.px/5280)/3);
-	grid_pos.py = ceil((float)(cur_pos.py/5280)/3);
 }
 
 void Aircraft::PrintMembers() const {
@@ -100,6 +124,6 @@ void Aircraft::ChangeVelocity(Velocity newVel) {
 }
 
 void Aircraft::ChangeElevation(int elevation) {
-	cur_pos.pz = elevation;
-	grid_pos.pz = elevation;
+	targetElevation = elevation;
+	ascendDescend = true;
 }

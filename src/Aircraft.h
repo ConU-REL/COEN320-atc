@@ -8,6 +8,7 @@
 
 #define HOLDING_TIMER 10 // duplicate in airspace.h, avoiding cyclic dependency
 #define HOLDING_SPEED 50
+#define ASCENT_VELOCITY 200
 
 class Aircraft {
 public:
@@ -26,6 +27,9 @@ public:
 	void StartHolding();
 	void StopHolding();
 	std::string Response();
+
+	bool ascendDescend = false;
+	int targetElevation;
 
 	Aircraft(int, int, Position, Velocity, int);
 	virtual ~Aircraft();
